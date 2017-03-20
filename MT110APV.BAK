@@ -1,0 +1,54 @@
+#INCLUDE "TOTVS.CH"
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³MT110APV  ºAutor  ³Ricardo P Sotomayor º Data ³  10/31/16   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Filtro de Aprovadores de Solicitação                       º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ AP                                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function MT110APV
+Local lRet 		:= .T.
+Local _aAprov := U_BJCOMP01()//Verifica se o usuario atual é aprovador de sc      
+Local _lCompr := U_BJCOMP02()
+Local _lAprov := _aAprov[1]
+Local _cUnida := _aAprov[2]
+Local _lCompr	:= .f.
+Local _cNumSC 	:= SC1->C1_NUM
+Local aAReaSc1	:= SC1->(GetArea())
+Local _cPreProd	:= GetMV("MV_M110PRE")
+If GetMV("MV_USAM110")== "S"
+	If _lAProv
+		_lCompr := U_BJCOMP02()//Comprador()
+		If _lCompr .And. RetCodUsr() == SC1->C1_USER
+			Aviso("Atenção - MT110APV","Não é permitido o comprador aprovar a propria solicitação.",{"Voltar"})
+			lRet := .F.
+		EndIf
+		If lRet
+			DbSelectArea("SC1")
+			DbSetOrder(1)
+			DbGoTop()
+			If DbSeek(xFilial("SC1")+_cNumSC) 
+				While SC1->(!Eof()) .And. SC1->(C1_FILIAL+C1_NUM)==xFilial("SC1")+_cNumSC .And. lRet
+                    If Alltrim(SC1->C1_PRODUTO) == Alltrim(_cPreProd)
+						Aviso("Atenção - MT110APV","Não é possivel aprovar solicotação com Pré Produto.",{"Voltar"})
+						lRet := .f.
+	                EndIF
+					SC1->(DbSkip())
+				End
+			EndIF	
+		EndIf
+	Else
+		Aviso("Atenção - MT110APV","Você não é aprovador de Solicitação de Compras.",{"Voltar"})
+		lRet := .F.
+	EndIf
+EndIf                            
+RestArea(aAReaSc1)
+Return(lRet)

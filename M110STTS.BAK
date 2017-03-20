@@ -1,0 +1,92 @@
+#INCLUDE "TOTVS.CH"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³M110STTS  ºAutor  ³Ricardo P Sotomayor º Data ³  11/07/16   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Usado para desfazer aprovação em SC alteradas.             º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ AP                                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+
+/*
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Function A110Inclui, A110Altera,  e A110Deleta responsaveis pela inclusão, alteração, exclusão e cópia das Solicitações de Compras. ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+*/
+User Function M110STTS()
+Local _cNumSC	:= Paramixb[1]//Numero da Solicitação
+Local _nOpt		:= Paramixb[2]//1-Incluir   2 - Alterar   ///3=inclusão / 4=alteração / 5=exclusão
+Local _aArea	:= GetArea()
+Local _aAreaSC1	:= SC1->(GetArea())
+Local _cPreProd	:= GetMV("MV_M110PRE")
+Local aPreProd  := {}      
+Local cPreProd  := ""
+Local _nItem 	:= 0
+Private cJustifica	:= CriaVar("C1_JUSTIF")
+Private oJustifica
+Private _nOpc := 0
+Private cEOL  := "CHR(13)+CHR(10)"
+Private _cStatus1  
+Private _lPre := .F.
+
+If GetMV("MV_USAM110")== "S"
+	DbSelectArea("SC1")
+	DbSetOrder(1)
+	DbGoTop()
+	If DbSeek(xFilial("SC1")+_cNumSC)
+		While SC1->(!Eof()) .And. SC1->(C1_FILIAL+C1_NUM)==xFilial("SC1")+_cNumSC
+			If Alltrim(SC1->C1_PRODUTO) == Alltrim(_cPreProd)
+        		_lPre := .T.
+   				cPreProd+= Alltrim(SC1->C1_OBS)+" ;"
+			EndIf
+			SC1->(DbSkip())
+		End
+	EndIf 
+	
+	DbSelectArea("SC1")
+	DbSetOrder(1)
+	DbGoTop()
+	If DbSeek(xFilial("SC1")+_cNumSC)
+		While SC1->(!Eof()) .And. SC1->(C1_FILIAL+C1_NUM)==xFilial("SC1")+_cNumSC
+			_nItem += 1
+			If RecLock("SC1")
+				SC1->C1_APROV   := "B"
+				SC1->C1_DATAAPR := CtoD("")
+				SC1->C1_HORAAPR := ""
+				If _nOpt == 1//3
+					SC1->C1_HISTMOV := U_MNTHIST(SC1->C1_HISTMOV,"Inclusão de SC","I")
+	        		If _lPre                                                             
+						SC1->C1_HISTMOV := U_MNTHIST(SC1->C1_HISTMOV,"SC Com Pré Produto: "+cPreProd,"P")
+					EndIF	
+					If _nItem ==1	                                                           
+						U_SC1NOTF("1","Inclusão de Solicitação de Compras",,'mata110.html')
+					EndIf	
+				ElseIf _nOpt == 2 //4
+					SC1->C1_HISTMOV := U_MNTHIST(SC1->C1_HISTMOV,"Alteração de SC","U")
+	        		If _lPre
+						SC1->C1_HISTMOV := U_MNTHIST(SC1->C1_HISTMOV,"SC Com Pré Produto: "+cPreProd,"P")
+					EndIF	
+					If _nItem ==1	                                                           
+						U_SC1NOTF("2","Alteração de Solicitação de Compras(Bloqueio)",,'mata110.html')
+					EndIf	
+				Else
+					SC1->C1_HISTMOV := U_MNTHIST(SC1->C1_HISTMOV,"Bloqueio de SC","B")
+					If _nItem ==1	                                                           
+						U_SC1NOTF("2","Alteração de Solicitação de Compras(Bloqueio)",,'mata110.html')
+					EndIf	
+				EndIf
+				SC1->(MsUnlock())
+			EndIf
+			SC1->(DbSkip())
+		End
+	EndIf
+EndIf
+Return
