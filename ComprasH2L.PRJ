@@ -1,0 +1,68 @@
+Group Compras-H2L
+   Version=7.0
+   VSSDB=
+   HasProperties=1
+   Properties
+      BeforeApply=
+      AfterApply=
+      Icon=
+      ID=
+      Version=
+      PalmName=
+      OutPut=
+   End
+   ProjectsCount=1
+   Project Solicitaçao
+      FoldersCount=2
+      Folder Genericos
+         VSSPath=Fontes
+         FilesCount=3
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\COMXH2L.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\FiltroF3.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\FilXBb1.prw
+             Type=T
+         End
+      End
+      Folder PE
+         VSSPath=Definições
+         FilesCount=11
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\M110STTS.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\MA110BAR.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\MT110APV.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\MT110CFM.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\MT110CP2.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\MT110DEL.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\MT110FIL.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\MT110LOK.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\MT110ROT.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\MT110TOK.prw
+             Type=T
+         End
+         File \TOTVS 11\Microsiga\RDMAKE\ComprasH2L\MT110VLD.prw
+             Type=T
+         End
+      End
+   End
+End
